@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2014 David R. Bild
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        id="com.willbild.cordova.cast"
+	version="0.1.0-dev">
+
+  <name>Chromecast</name>
+  <description>Cordova Chromecast Plugin</description>
+  <license>Apache 2.0</license>
+  <keywords>cordova,chromecast,cast</keywords>
+  <repo>https://github.com/drbild/cordova-plugin-cast.git</repo>
+  <issue>https://github.com/drbild/cordova-plugin-cast/issues</issue>
+  
+  <engines>
+    <engine name="cordova" version="&gt;=3.4.0" />
+  </engines>
+
+  <js-module src="www/cast.js" name="Cast">
+    <clobbers target="Cast"/>
+  </js-module>
+  
+  <!-- ios -->
+  <platform name="ios">
+    <config-file target="config.xml" parent="/*">
+      <feature name="Cast">
+        <param name="ios-package" value="CDVCast"/>
+      </feature>
+    </config-file>
+    <header-file src="src/ios/CDVCast.h" />
+    <source-file src="src/ios/CDVCast.m" />
+  </platform>
+  
+</plugin>
