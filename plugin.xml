@@ -38,11 +38,18 @@
   <platform name="ios">
     <config-file target="config.xml" parent="/*">
       <feature name="Cast">
-        <param name="ios-package" value="CDVCast"/>
+        <param name="ios-package" value="CDVCast" />
       </feature>
     </config-file>
+
     <header-file src="src/ios/CDVCast.h" />
     <source-file src="src/ios/CDVCast.m" />
+
+    <framework src="CoreText.framework" />
+    <framework src="MediaAccessibility.framework" />
+    <framework src="Security.framework" />
+    <framework src="CFNetwork.framework" />
+    <framework src="lib/ios/GoogleCast.framework" custom="true" />
   </platform>
   
 </plugin>
