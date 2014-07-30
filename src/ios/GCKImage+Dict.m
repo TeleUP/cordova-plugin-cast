@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-#import <Foundation/Foundation.h>
-#import <Cordova/CDVPlugin.h>
-#import <GoogleCast/GoogleCast.h>
+#import "GCKImage+Dict.h"
 
-@interface CDVCast : CDVPlugin<GCKDeviceFilterListener, GCKLoggerDelegate>
+@implementation GCKImage (dict)
 
-- (void) initialize:(CDVInvokedUrlCommand*)command;
-- (void) startScan:(CDVInvokedUrlCommand*)command;
-- (void) stopScan:(CDVInvokedUrlCommand*)command;
+- (NSDictionary *) dictValue {
+  NSDictionary *result =  @{
+    @"url"    : [self.URL absoluteString],
+    @"width"  : [NSNumber numberWithInteger:self.width],
+    @"height" : [NSNumber numberWithInteger:self.height]
+  };
+  return result;
+}
 
 @end

@@ -33,6 +33,14 @@
   <js-module src="www/cast.js" name="Cast">
     <clobbers target="Cast"/>
   </js-module>
+
+  <js-module src="www/CastIcon.js" name="CastIcon">
+    <clobbers target="CastIcon"/>
+  </js-module>
+
+  <js-module src="www/CastDevice.js" name="CastDevice">
+    <clobbers target="CastDevice"/>
+  </js-module>
   
   <!-- ios -->
   <platform name="ios">
@@ -44,6 +52,10 @@
 
     <header-file src="src/ios/CDVCast.h" />
     <source-file src="src/ios/CDVCast.m" />
+    <header-file src="src/ios/GCKImage+Dict.h" />
+    <source-file src="src/ios/GCKImage+Dict.m" />
+    <header-file src="src/ios/GCKDevice+Dict.h" />
+    <source-file src="src/ios/GCKDevice+Dict.m" />
 
     <framework src="CoreText.framework" />
     <framework src="MediaAccessibility.framework" />

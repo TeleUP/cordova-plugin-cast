@@ -20,11 +20,101 @@
 (function () {
     "use strict";
 
-    var exec = require('cordova/exec');
-    
-    var Cast = function (opt) {
-	
-    };
+    var exec = require('cordova/exec'),
+    CastDevice = require('./CastDevice');
+
+    var DEBUG = 1;
+    var TRACE = 2;
+    var LOG_LEVEL = 0;
+
+    function logd(msg) {
+	if (LOG_LEVEL > DEBUG)
+	    console.log("cast: " + msg);
+    }
+
+    function logd(msg) {
+	if (LOG_LEVEL > TRACE)
+	    console.log("cast: " + msg);
+    }
+
+    /**
+     * Creates a new Cast instance for interacting with the native
+     * Cast APIs.
+     * 
+     * @constructor
+     * @this {Cast}
+     * @param {string} appId The id of the Chromecast receiver app.
+     * @param {number} logLevel The level (0 for debug, 1 for trace) at which to log.
+     */
+    var Cast = function (appId, logLevel) {
+	if (logLevel == undefined)
+	    logLevel = 0;
+
+	LOG_LEVEL = logLevel;
+
+	var self = this;
+
+	var _appId = appId;
+	var _onDeviceOnline;
+	var _onDeviceOffline;
+
+	/**
+	 * Retreives the id of the Chromecast receiver app.
+	 *
+	 * @return {string} The id of the Chromecast receiver app.
+	 */
+	this.appId = function () {
+	    return _appId;
+	};
+
+	this.initialize = function (onSuccess, onError) {
+	    exec(onSuccess,
+		 onError,
+		 "Cast",
+		 "initialize",
+		 [_appId,
+		  LOG_LEVEL]);
+	};
+
+	/**
+	 * Sets the listeners to be notified of changed scan results.
+	 * 
+	 * @param {Function} onDeviceOnline A function taking a CastDevice param
+	 *                   that is called when the device becomes available.
+	 * @param {Function} onDeviceOffline A function taking a CastDevice param
+	 *                   that is called when the device becomes unavailable.
+	 */
+	this.setScanListener = function (onDeviceOnline, onDeviceOffline) {
+	    _onDeviceOnline = onDeviceOnline;
+	    _onDeviceOffline = onDeviceOffline;
+	};
+
+	/**
+	 * Enables scanning for available cast devices.
+	 */
+	this.startScan = function () {
+	    exec(function (msg) 
+		 {
+		     var device = new CastDevice(msg.device);
+		     msg.type == "online" ?  _onDeviceOnline(device) :  _onDeviceOffline(device);
+		 },
+		 null,
+		 "Cast",
+		 "startScan",
+		 []);
+	};
+
+	/**
+	 * Disables scanning for available cast devices.
+	 */
+	this.stopScan = function () {
+	    exec(null,
+		 null,
+		 "Cast",
+		 "stopScan",
+		 []);
+	};
+    }
 
     /*
      * Export the public API

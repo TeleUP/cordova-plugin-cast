@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-#import <Foundation/Foundation.h>
-#import <Cordova/CDVPlugin.h>
 #import <GoogleCast/GoogleCast.h>
 
-@interface CDVCast : CDVPlugin<GCKDeviceFilterListener, GCKLoggerDelegate>
-
-- (void) initialize:(CDVInvokedUrlCommand*)command;
-- (void) startScan:(CDVInvokedUrlCommand*)command;
-- (void) stopScan:(CDVInvokedUrlCommand*)command;
-
+@interface GCKImage (dict)
+- (NSDictionary *) dictValue;
 @end

@@ -14,14 +14,29 @@
  * limitations under the License.
  */
 
-#import <Foundation/Foundation.h>
-#import <Cordova/CDVPlugin.h>
-#import <GoogleCast/GoogleCast.h>
+/**
+ * The url, width, and height of an icon representing a particular
+ * cast device.
+ */
+var CastIcon = function (spec) {
+    "use strict";
+    var self = this;
+	
+    var _url    = spec.url,
+    _width  = spec.width,
+    _height = spec.height;
 
-@interface CDVCast : CDVPlugin<GCKDeviceFilterListener, GCKLoggerDelegate>
+    this.url = function() {
+	return _url;
+    };
+	
+    this.width = function() {
+	return _width;
+    };
+	
+    this.height = function() {
+	return _height;
+    };
+};
 
-- (void) initialize:(CDVInvokedUrlCommand*)command;
-- (void) startScan:(CDVInvokedUrlCommand*)command;
-- (void) stopScan:(CDVInvokedUrlCommand*)command;
-
-@end
+module.exports = CastIcon;
