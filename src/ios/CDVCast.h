@@ -18,10 +18,31 @@
 #import <Cordova/CDVPlugin.h>
 #import <GoogleCast/GoogleCast.h>
 
-@interface CDVCast : CDVPlugin<GCKDeviceFilterListener, GCKLoggerDelegate>
+@interface CDVCast : CDVPlugin<GCKDeviceFilterListener,
+                               GCKLoggerDelegate,
+                               GCKDeviceManagerDelegate>
 
 - (void) initialize:(CDVInvokedUrlCommand*)command;
 - (void) startScan:(CDVInvokedUrlCommand*)command;
-- (void) stopScan:(CDVInvokedUrlCommand*)command;
+- (void) stopScan:(CDVInvokedUrlCommand*)command; 
+- (void) setConnectionListener:(CDVInvokedUrlCommand*)command;
+- (void) connect:(CDVInvokedUrlCommand*)command;
+- (void) disconnect:(CDVInvokedUrlCommand*)command;
+- (void) receiveTextMessage:(CDVInvokedUrlCommand*)command;
+- (void) sendTextMessage:(CDVInvokedUrlCommand*)command;
+- (void) didReceiveTextMessage:(CDVInvokedUrlCommand*)command;
+- (void) launchApplication:(CDVInvokedUrlCommand*)command;
+- (void) joinApplication:(CDVInvokedUrlCommand*)command;
+- (void) leaveApplication:(CDVInvokedUrlCommand*)command;
+- (void) stopApplication:(CDVInvokedUrlCommand*)command;
+- (void) stopApplicationWithSessionId:(CDVInvokedUrlCommand*)command;
+- (void) setVolume:(CDVInvokedUrlCommand*)command;
+- (void) setMuted:(CDVInvokedUrlCommand*)command;
+- (void) requestDeviceStatus:(CDVInvokedUrlCommand*)command;
+- (void) isConnected:(CDVInvokedUrlCommand*)command;
+- (void) isConnectedToApp:(CDVInvokedUrlCommand*)command;
+- (void) isReconnecting:(CDVInvokedUrlCommand*)command;
+- (void) getReconnectTimeout:(CDVInvokedUrlCommand*)command;
+- (void) setReconnectTimeout:(CDVInvokedUrlCommand*)command;
 
 @end

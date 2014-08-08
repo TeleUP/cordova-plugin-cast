@@ -41,6 +41,14 @@
   <js-module src="www/CastDevice.js" name="CastDevice">
     <clobbers target="CastDevice"/>
   </js-module>
+
+  <js-module src="www/CastSenderApplicationInfo.js" name="CastSenderApplicationInfo">
+    <clobbers target="CastSenderApplicationInfo"/>
+  </js-module>
+
+  <js-module src="www/CastApplicationMetadata.js" name="CastApplicationMetadata">
+    <clobbers target="CastApplicationMetadata"/>
+  </js-module>
   
   <!-- ios -->
   <platform name="ios">
@@ -52,10 +60,16 @@
 
     <header-file src="src/ios/CDVCast.h" />
     <source-file src="src/ios/CDVCast.m" />
+    <header-file src="src/ios/CDVCastChannel.h" />
+    <source-file src="src/ios/CDVCastChannel.m" />
     <header-file src="src/ios/GCKImage+Dict.h" />
     <source-file src="src/ios/GCKImage+Dict.m" />
     <header-file src="src/ios/GCKDevice+Dict.h" />
     <source-file src="src/ios/GCKDevice+Dict.m" />
+    <header-file src="src/ios/GCKSenderApplicationInfo+Dict.h" />
+    <source-file src="src/ios/GCKSenderApplicationInfo+Dict.m" />
+    <header-file src="src/ios/GCKApplicationMetadata+Dict.h" />
+    <source-file src="src/ios/GCKApplicationMetadata+Dict.m" />
 
     <framework src="CoreText.framework" />
     <framework src="MediaAccessibility.framework" />

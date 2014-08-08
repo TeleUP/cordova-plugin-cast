@@ -28,13 +28,17 @@
     var LOG_LEVEL = 0;
 
     function logd(msg) {
-	if (LOG_LEVEL > DEBUG)
+	if (LOG_LEVEL >= DEBUG)
 	    console.log("cast: " + msg);
     }
 
-    function logd(msg) {
-	if (LOG_LEVEL > TRACE)
+    function logt(msg) {
+	if (LOG_LEVEL >= TRACE)
 	    console.log("cast: " + msg);
+    }
+
+    function throwe(msg) {
+	throw new Error(msg);
     }
 
     /**
@@ -57,6 +61,7 @@
 	var _appId = appId;
 	var _onDeviceOnline;
 	var _onDeviceOffline;
+	var _connectionListener;
 
 	/**
 	 * Retreives the id of the Chromecast receiver app.
@@ -67,6 +72,12 @@
 	    return _appId;
 	};
 
+	/**
+	 * Initializes the Cast library.
+	 *
+	 * @param {Function} onSuccess callback for successful initialization
+	 * @param {Function} onError   callback for a failed initialization
+	 */
 	this.initialize = function (onSuccess, onError) {
 	    exec(onSuccess,
 		 onError,
@@ -89,6 +100,36 @@
 	    _onDeviceOffline = onDeviceOffline;
 	};
 
+	var dispatchConnectionCallback = function (msg) {
+	    var type = msg.type;
+	    var args = msg.args;
+	    
+	    // deserialize application metadata
+	    if (type == 'connectedToApplication')
+		args[0] = new CastApplicationMetadata(args[0]);
+	    if (type == 'applicationStatusReceived')
+		args[0] = new CastApplicationMetadata(args[0]);
+
+	    var cb = _connectionListener[type];
+	    if (cb) {
+		cb.apply(_connectionListener, args);
+	    } else {
+		logd("Missing connection callback for " + type + ".");
+	    }
+	}
+
+	/**
+	 * Sets the listener to be notified of connection 
+	 */
+	this.setConnectionListener = function(connectionListener) {
+	    _connectionListener = connectionListener;
+	    exec(dispatchConnectionCallback,
+		 throwe,
+		 "Cast",
+		 "setConnectionListener",
+		 []);
+	}
+
 	/**
 	 * Enables scanning for available cast devices.
 	 */
@@ -98,7 +139,7 @@
 		     var device = new CastDevice(msg.device);
 		     msg.type == "online" ?  _onDeviceOnline(device) :  _onDeviceOffline(device);
 		 },
-		 null,
+		 throwe,
 		 "Cast",
 		 "startScan",
 		 []);
@@ -109,12 +150,216 @@
 	 */
 	this.stopScan = function () {
 	    exec(null,
-		 null,
+		 throwe,
 		 "Cast",
 		 "stopScan",
 		 []);
 	};
-    }
+
+	/**
+	 * Connects to the specified device.
+	 *
+	 * @param {CastDevice} the device to which to connect.
+	 * @param {onSuccess} callback if the connection attempt starts successfully. The
+	 *                             success or failure of the actual connection is indicated
+	 *                             by the connectionListener callbacks.
+	 * @param {onError} callback if the connection attempt cannot be started.
+	 */
+	this.connect = function (device, onSuccess, onError) {
+	    exec(onSuccess,
+		 onError,
+		 "Cast",
+		 "connect",
+		 [device.deviceId()]);
+	};
+
+	/**
+	 * Disconnects from the current device, if any.
+	 */
+	this.disconnect = function () {
+	    exec(null,
+		 throwe,
+		 "Cast",
+		 "connect",
+		 []);
+	};
+
+	/**
+	 *
+	 */
+	this.setReceivedMessageListener = function (namespace, onMessageReceived) {
+	    exec(onMessageReceived,
+		 throwe,
+		 "Cast",
+		 "receiveTextMessage",
+		 [namespace]);
+	};
+
+	/**
+	 *
+	 */
+	this.sendMessage = function (msg) {
+	    exec(null,
+		 throwe,
+		 "Cast",
+		 "sendTextMessage",
+		 [msg]);
+	};
+
+	/**
+	 *
+	 */
+	this.launchApplication = function (relaunchIfRunning, onSuccess, onError) {
+	    exec(onSuccess,
+		 onError,
+		 "Cast",
+		 "launchApplication",
+		 [relaunchIfRunning]); 
+	};
+
+	/**
+	 *
+	 */
+	this.joinApplication = function (onSuccess, onError) {
+	    exec(onSuccess,
+		 onError,
+		 "Cast",
+		 "joinApplication",
+		 []);
+	};
+
+	/**
+	 *
+	 */
+	this.joinApplicationWithSessionId = function (sessionId, onSuccess, onError) {
+	    exec(onSuccess,
+		 onError,
+		 "Cast",
+		 "joinApplication",
+		 [sessionId]);
+	};
+
+	/**
+	 *
+	 */
+	this.leaveApplication = function (onSuccess, onError) {
+	    exec(onSuccess,
+		 onError,
+		 "Cast",
+		 "leaveApplication",
+		 []);
+	};
+
+	/**
+	 *
+	 */
+	this.stopApplication = function (onSuccess, onError) {
+	    exec(onSuccess,
+		 onError,
+		 "Cast",
+		 "stopApplication",
+		 []);
+	};
+
+	/**
+	 *
+	 */
+	this.stopApplicationWithSessionId = function (sessionId, onSuccess, onError) {
+	    exec(onSuccess,
+		 onError,
+		 "Cast",
+		 "stopApplicationWithSessionId",
+		 [sessionId]);
+	};
+
+	/**
+	 *
+	 */
+	this.setVolume = function (volume, onSuccess, onError) {
+	    exec(onSuccess,
+		 onError,
+		 "Cast",
+		 "setVolume",
+		 [volume]);
+	};
+
+	/**
+	 *
+	 */
+	this.setMuted = function (muted, onSuccess, onError) {
+	    exec(onSuccess,
+		 onError,
+		 "Cast",
+		 "setMuted",
+		 [muted]);
+	};
+
+	/**
+	 *
+	 */
+	this.requestDeviceStatus = function (onSuccess, onError) {
+	    exec(onSuccess,
+		 onError,
+		 "Cast",
+		 "requestDeviceStatus",
+		 []);
+	};
+
+	/**
+	 *
+	 */
+	this.isConnected = function (onResult, onError) {
+	    exec(onResult,
+		 onError,
+		 "Cast",
+		 "isConnected",
+		[]);
+	};
+
+	/**
+	 *
+	 */
+	this.isConnectedToApp = function (onResult, onError) {
+	    exec(onResult,
+		 onError,
+		 "Cast",
+		 "isConnectedToApp",
+		 []);
+	};
+
+	/**
+	 *
+	 */
+	this.isReconnecting = function (onResult, onError) {
+	    exec(onResult,
+		 onError,
+		 "Cast",
+		 "isReconnecting",
+		 []);
+	};
+
+	/**
+	 *
+	 */
+	this.reconnectTimeout = function (onResult, onError) {
+	    exec(onResult,
+		 onError,
+		 "Cast",
+		 "getReconnectTimeout",
+		 []);
+	};
+
+	/**
+	 *
+	 */
+	this.setReconnectTimeout = function (timeout, onSuccess, onError) {
+	    exec(onSuccess,
+		 onError,
+		 "Cast",
+		 "setReconnectTimeout",
+		 []);
+	};
+    };
 
     /*
      * Export the public API
