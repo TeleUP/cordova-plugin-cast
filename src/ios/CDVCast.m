@@ -44,8 +44,6 @@ static void logTrace(NSString *format, ...) {
 
 @interface CDVCast ()
 
-@property(nonatomic) NSString* appId;
-
 @property(nonatomic) GCKDeviceScanner* scanner;
 @property(nonatomic) GCKDeviceFilter* filter;
 
@@ -109,18 +107,10 @@ static void logTrace(NSString *format, ...) {
 }
 
 - (void) initialize:(CDVInvokedUrlCommand*)command {
-  LOG_LEVEL = [[command.arguments objectAtIndex:1] integerValue];
+  LOG_LEVEL = [[command.arguments objectAtIndex:0] integerValue];
   [GCKLogger sharedInstance].delegate = self;
 
   logDebug(@"CDVCast: [->] initialize()");
-
-  self.appId = [command.arguments objectAtIndex:0];
-
-  // Create scanner and filter
-  self.scanner = [[GCKDeviceScanner alloc] init];
-  GCKFilterCriteria *criteria = [GCKFilterCriteria criteriaForAvailableApplicationWithID:self.appId];
-  self.filter = [[GCKDeviceFilter alloc] initWithDeviceScanner:self.scanner criteria:criteria];
-  [self.filter addDeviceFilterListener:self];
 
   [self sendSuccess:command];
 
@@ -128,7 +118,22 @@ static void logTrace(NSString *format, ...) {
 }
 
 - (void) startScan:(CDVInvokedUrlCommand*)command {
-  logDebug(@"CDVCast: [->] startScan()");
+  NSString *appId = [command.arguments objectAtIndex:0];
+
+  logDebug(@"CDVCast: [->] startScan(%@)", appId);
+
+  // Stop previous scan, if any.
+  if (self.scanner != nil && self.scanner.scanning) {
+    [self.scanner stopScan];
+    self.filter = nil;
+    self.scanner = nil;
+  }
+
+  // Create scanner and filter
+  self.scanner = [[GCKDeviceScanner alloc] init];
+  GCKFilterCriteria *criteria = [GCKFilterCriteria criteriaForAvailableApplicationWithID:appId];
+  self.filter = [[GCKDeviceFilter alloc] initWithDeviceScanner:self.scanner criteria:criteria];
+  [self.filter addDeviceFilterListener:self];
 
   self.scanListenerCallbackId = command.callbackId;
   [self.scanner startScan];
@@ -253,27 +258,29 @@ static void logTrace(NSString *format, ...) {
 }
 
 - (void) launchApplication:(CDVInvokedUrlCommand*)command {
-  BOOL relaunchIfRunning = [[command.arguments objectAtIndex:0] boolValue];
-  logDebug(@"CDVCast: [->] launchApplication(%hhd)", relaunchIfRunning);
+  NSString *appId = [command.arguments objectAtIndex:0];
+  BOOL relaunchIfRunning = [[command.arguments objectAtIndex:1] boolValue];
+  logDebug(@"CDVCast: [->] launchApplication(%@, %hhd)", appId, relaunchIfRunning);
 
   if (![self isConnected]) {
     [self sendIllegalAccessException:@"Must connect to device first." command:command];
     goto ret;
   }
 
-  if ([self.deviceManager launchApplication:self.appId relaunchIfRunning:relaunchIfRunning])
+  if ([self.deviceManager launchApplication:appId relaunchIfRunning:relaunchIfRunning])
     [self sendSuccess:command];
   else
     [self sendError:command];
   
  ret:
-  logDebug(@"CDVCast: [<-] launchApplication(%hhd)", relaunchIfRunning);
+  logDebug(@"CDVCast: [<-] launchApplication(%@, %hhd)", appId, relaunchIfRunning);
 }
 
 - (void) joinApplication:(CDVInvokedUrlCommand*)command {
+  NSString *appId = [command.arguments objectAtIndex:0];
   NSString *sessionId = nil;
-  if ([command.arguments count] == 1) sessionId = [command.arguments objectAtIndex:0];
-  logDebug(@"CDVCast: [->] joinApplication(%@)", sessionId);
+  if ([command.arguments count] == 2) sessionId = [command.arguments objectAtIndex:1];
+  logDebug(@"CDVCast: [->] joinApplication(%@, %@)", appId, sessionId);
   
   if (![self isConnected]) {
     [self sendIllegalAccessException:@"Must connect to device first." command:command];
@@ -281,19 +288,19 @@ static void logTrace(NSString *format, ...) {
   }
 
   if (sessionId == nil) {
-    if ([self.deviceManager joinApplication:self.appId sessionID:sessionId])
+    if ([self.deviceManager joinApplication:appId sessionID:sessionId])
       [self sendSuccess:command];
     else
       [self sendError:command];
   } else {
-    if ([self.deviceManager joinApplication:self.appId])
+    if ([self.deviceManager joinApplication:appId])
       [self sendSuccess:command];
     else
       [self sendError:command];
   }
 
  ret:
-  logDebug(@"CDVCast: [<-] joinApplication(%@)", sessionId);
+  logDebug(@"CDVCast: [<-] joinApplication(%@, %@)", appId, sessionId);
 }
 
 - (void) leaveApplication:(CDVInvokedUrlCommand*)command {

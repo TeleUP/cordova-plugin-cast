@@ -47,10 +47,9 @@
      * 
      * @constructor
      * @this {Cast}
-     * @param {string} appId The id of the Chromecast receiver app.
      * @param {number} logLevel The level (0 for debug, 1 for trace) at which to log.
      */
-    var Cast = function (appId, logLevel) {
+    var Cast = function (logLevel) {
 	if (logLevel == undefined)
 	    logLevel = 0;
 
@@ -58,19 +57,9 @@
 
 	var self = this;
 
-	var _appId = appId;
 	var _onDeviceOnline;
 	var _onDeviceOffline;
 	var _connectionListener;
-
-	/**
-	 * Retreives the id of the Chromecast receiver app.
-	 *
-	 * @return {string} The id of the Chromecast receiver app.
-	 */
-	this.appId = function () {
-	    return _appId;
-	};
 
 	/**
 	 * Initializes the Cast library.
@@ -83,8 +72,7 @@
 		 onError,
 		 "Cast",
 		 "initialize",
-		 [_appId,
-		  LOG_LEVEL]);
+		 [LOG_LEVEL]);
 	};
 
 	/**
@@ -133,7 +121,7 @@
 	/**
 	 * Enables scanning for available cast devices.
 	 */
-	this.startScan = function () {
+	this.startScan = function (appId) {
 	    exec(function (msg) 
 		 {
 		     var device = new CastDevice(msg.device);
@@ -142,7 +130,7 @@
 		 throwe,
 		 "Cast",
 		 "startScan",
-		 []);
+		 [appId]);
 	};
 
 	/**
@@ -159,7 +147,7 @@
 	/**
 	 * Connects to the specified device.
 	 *
-	 * @param {CastDevice} the device to which to connect.
+	 * @param {CastDevice} device the device to which to connect.
 	 * @param {onSuccess} callback if the connection attempt starts successfully. The
 	 *                             success or failure of the actual connection is indicated
 	 *                             by the connectionListener callbacks.
@@ -209,34 +197,34 @@
 	/**
 	 *
 	 */
-	this.launchApplication = function (relaunchIfRunning, onSuccess, onError) {
+	this.launchApplication = function (appId, relaunchIfRunning, onSuccess, onError) {
 	    exec(onSuccess,
 		 onError,
 		 "Cast",
 		 "launchApplication",
-		 [relaunchIfRunning]); 
+		 [appId, relaunchIfRunning]); 
 	};
 
 	/**
 	 *
 	 */
-	this.joinApplication = function (onSuccess, onError) {
+	this.joinApplication = function (appId, onSuccess, onError) {
 	    exec(onSuccess,
 		 onError,
 		 "Cast",
 		 "joinApplication",
-		 []);
+		 [appId]);
 	};
 
 	/**
 	 *
 	 */
-	this.joinApplicationWithSessionId = function (sessionId, onSuccess, onError) {
+	this.joinApplicationWithSessionId = function (appId, sessionId, onSuccess, onError) {
 	    exec(onSuccess,
 		 onError,
 		 "Cast",
 		 "joinApplication",
-		 [sessionId]);
+		 [appId, sessionId]);
 	};
 
 	/**
