@@ -592,7 +592,7 @@ static void logTrace(NSString *format, ...) {
   }
   
   NSDictionary *message = @{
-    @"type" : @"failToConnectToApplication",
+    @"type" : @"failedToConnectToApplication",
     @"args" : @[error.description]
   };
 
