@@ -20,10 +20,16 @@ angular.module('cast', [])
 
 	this.$get = ['$q', function castFactory($q) {
 
-	    var cast = new Cast(LOG_LEVEL);
-	    cast.initialize(null, null);
-
+	    var cast = null;
 	    var session = null;
+
+	    // initialize the plugin, if loaded
+	    if (window.Cast) {
+		cast = new Cast(LOG_LEVEL);
+		cast.initialize(null, null);
+	    } else {
+		console.log("ngCast: Cast cordova plugin was not loaded.");
+	    }
 
 	    /**
 	     * Represents a connection to an instance of the receiver application running on
