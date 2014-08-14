@@ -44,11 +44,12 @@ angular.module('cast', [])
 	     * @param {string} namespace the namespace for the cast
 	     *                           channel to create.
 	     */
-	    var CastSession = function (q, appId, namespace) {
+	    var CastSession = function (q, device, appId, namespace) {
 	    
 		var self = this;
 
 		var _q = q;
+		var _device = device;
 		var _appId = appId;
 		var _namespace = namespace;
 
@@ -154,6 +155,10 @@ angular.module('cast', [])
 			// ignore
 		    }
 		};
+
+		// Start connection to the device
+		cast.setConnectionListener(_connectionListener);
+		cast.connect(_device);
 	    };
 
 	    return {
@@ -199,7 +204,7 @@ angular.module('cast', [])
 		 */
 		connect: function (device, appId, namespace) {
 		    var q = $q.defer();
-		    session = new CastSession(q, appId, namespace);
+		    session = new CastSession(q, device, appId, namespace);
 		    return q.promise;
 		}
 	    };
