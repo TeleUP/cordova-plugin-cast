@@ -200,7 +200,7 @@ angular.module('cast', [])
 		connect: function (device, appId, namespace) {
 		    var q = $q.defer();
 		    session = new CastSession(q, appId, namespace);
-		    return q;
+		    return q.promise;
 		}
 	    };
 
