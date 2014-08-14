@@ -118,7 +118,7 @@ angular.module('cast', [])
 		this.setListeners = function (onReceivedMessage, onDisconnected) {
 		    _onReceivedMessage = apply(onReceivedMessage || angular.noop);
 		    _onDisconnected = apply(onDisconnected || angular.noop);
-		    cast.setReceivedMessageListener(_onReceivedMessage);
+		    cast.setReceivedMessageListener(_namespace, _onReceivedMessage);
 		};
 
 		/**
