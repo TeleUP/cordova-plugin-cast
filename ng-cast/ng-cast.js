@@ -52,7 +52,7 @@ angular.module('cast', [])
 		var _appId = appId;
 		var _namespace = namespace;
 
-		var _sessionId = sessionId;
+		var _sessionId;
 
 		var _onReceivedMessage;
 		var _onDisconnected;
