@@ -18,7 +18,7 @@ angular.module('cast', [])
 	    LOG_LEVEL = parseInt(logLevel, 10);
 	};
 
-	this.$get = ['$q', function castFactory($q) {
+	this.$get = ['$q', '$timeout', function castFactory($q, $timeout) {
 
 	    var cast = null;
 	    var session = null;
@@ -30,6 +30,23 @@ angular.module('cast', [])
 	    } else {
 		console.log("ngCast: Cast cordova plugin was not loaded.");
 	    }
+
+	    /**
+	     * Executes the given function inside an angular digest
+	     * cycle. Useful for executing callbacks.
+	     *
+	     * @param {Function} f the function to call inside a digest cycle.
+	     */
+	    var apply = function(f) {
+		return function() {
+		    var args = arguments;
+		    // use timeout instead of apply/digest in case
+		    // this is called during a digest cycle.
+		    $timeout( function () {
+			f.apply(this, args);
+		    });
+		};
+	    };
 
 	    /**
 	     * Represents a connection to an instance of the receiver application running on
@@ -99,8 +116,8 @@ angular.module('cast', [])
 		 *                                  string.
 		 */
 		this.setListeners = function (onReceivedMessage, onDisconnected) {
-		    _onReceivedMessage = onReceivedMessage;
-		    _onDisconnected = onDisconnected;
+		    _onReceivedMessage = apply(onReceivedMessage || angular.noop);
+		    _onDisconnected = apply(onDisconnected || angular.noop);
 		    cast.setReceivedMessageListener(_onReceivedMessage);
 		};
 
@@ -177,7 +194,9 @@ angular.module('cast', [])
 		 * @return {Function} a function that when invoked will stop the scan
 		 */
 		scan: function (appId, onDeviceOnline, onDeviceOffline) {
-		    cast.setScanListener(onDeviceOnline, onDeviceOffline);
+		    var _onDeviceOnline = apply(onDeviceOnline || angular.noop);
+		    var _onDeviceOffline = apply(onDeviceOffline || angular.noop);
+		    cast.setScanListener(_onDeviceOnline, _onDeviceOffline);
 		    cast.startScan(appId);
 		    return cast.stopScan;
 		},
