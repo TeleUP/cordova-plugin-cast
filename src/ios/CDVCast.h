@@ -30,7 +30,6 @@
 - (void) disconnect:(CDVInvokedUrlCommand*)command;
 - (void) receiveTextMessage:(CDVInvokedUrlCommand*)command;
 - (void) sendTextMessage:(CDVInvokedUrlCommand*)command;
-- (void) didReceiveTextMessage:(CDVInvokedUrlCommand*)command;
 - (void) launchApplication:(CDVInvokedUrlCommand*)command;
 - (void) joinApplication:(CDVInvokedUrlCommand*)command;
 - (void) leaveApplication:(CDVInvokedUrlCommand*)command;
@@ -44,5 +43,6 @@
 - (void) isReconnecting:(CDVInvokedUrlCommand*)command;
 - (void) getReconnectTimeout:(CDVInvokedUrlCommand*)command;
 - (void) setReconnectTimeout:(CDVInvokedUrlCommand*)command;
+- (void) didReceiveTextMessage:(NSString*)message;
 
 @end
