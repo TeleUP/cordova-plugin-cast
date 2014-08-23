@@ -168,7 +168,7 @@
 	    exec(null,
 		 throwe,
 		 "Cast",
-		 "connect",
+		 "disconnect",
 		 []);
 	};
 
