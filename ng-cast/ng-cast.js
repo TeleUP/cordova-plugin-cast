@@ -72,8 +72,8 @@ angular.module('cast', [])
 
 		var _sessionId;
 
-		var _onReceivedMessage;
-		var _onDisconnected;
+		var _onReceivedMessage = angular.noop;
+		var _onDisconnected = angular.noop;
 
 		/**
 		 * Gets the id of the receiver application for this session.
