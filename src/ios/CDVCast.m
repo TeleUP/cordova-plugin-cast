@@ -536,7 +536,7 @@ static void logTrace(NSString *format, ...) {
   
   NSDictionary *message = @{
     @"type" : @"failedToConnect",
-    @"args" : @[error.description]
+    @"args" : @[error ? error.description : @"null"]
   };
 
   CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
@@ -554,7 +554,7 @@ static void logTrace(NSString *format, ...) {
   
   NSDictionary *message = @{
     @"type" : @"disconnected",
-    @"args" : @[error.description]
+    @"args" : @[error ? error.description : @"null"]
   };
 
   CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
@@ -593,7 +593,7 @@ static void logTrace(NSString *format, ...) {
   
   NSDictionary *message = @{
     @"type" : @"failedToConnectToApplication",
-    @"args" : @[error.description]
+    @"args" : @[error ? error.description : @"null"]
   };
 
   CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
@@ -611,7 +611,7 @@ static void logTrace(NSString *format, ...) {
   
   NSDictionary *message = @{
     @"type" : @"diconnectedFromApplication",
-    @"args" : @[error.description]
+    @"args" : @[error ? error.description : @"null"]
   };
 
   CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
@@ -629,7 +629,7 @@ static void logTrace(NSString *format, ...) {
   
   NSDictionary *message = @{
     @"type" : @"failedToStopApplication",
-    @"args" : @[error.description]
+    @"args" : @[error ? error.description : @"null"]
   };
 
   CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
