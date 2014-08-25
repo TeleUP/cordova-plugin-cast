@@ -609,7 +609,7 @@ static void logTrace(NSString *format, ...) {
   }
   
   NSDictionary *message = @{
-    @"type" : @"diconnectedFromApplication",
+    @"type" : @"disconnectedFromApplication",
     @"args" : @[error ? error.description : @"null"]
   };
 
