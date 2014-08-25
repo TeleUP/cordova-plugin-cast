@@ -1,0 +1,28 @@
+{
+    "name": "ngCast",
+    "version": "1.0.0",
+    "homepage": "http://github.com/drbild/cordova-plugin-cast",
+    "authors": [
+	"David R. Bild <drbild@willbild.com>"
+    ],
+    "description": "AngularJS Cordova wrappers for the Cast plugin.",
+    "main": "./ng-cast/ng-cast.js",
+    "ignore" : [
+	"doc/",
+	"lib/",
+	"src/",
+	"www/",
+	"plugin.xml"
+    ],
+    "keywords": [
+	"cordova",
+	"phonegap",
+	"angular",
+	"angularjs",
+	"plugin",
+	"cast",
+	"chromecast"
+    ],
+    "license": "Apache",
+    "private": true
+}
