@@ -175,7 +175,7 @@ angular.module('cast', [])
 
 		// Start connection to the device
 		cast.setConnectionListener(_connectionListener);
-		cast.connect(_device);
+		cast.connect(_device, null, _connectionListener.failedToConnect);
 	    };
 
 	    return {
