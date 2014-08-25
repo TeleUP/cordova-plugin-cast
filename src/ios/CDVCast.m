@@ -164,16 +164,15 @@ static void logTrace(NSString *format, ...) {
   
   NSString *deviceId = [command.arguments objectAtIndex:0];
 
-  // must not be already connected
-  if (self.deviceManager != nil && [self isConnected]) {
-    [self sendIllegalAccessException:@"Must disconnect from current device before connecting." command:command];
-    goto ret;
-  }
-
   // must be scanning so we can lookup device by id
   if (![self isScanning]) {
     [self sendIllegalAccessException:@"Must enable scanning before connecting to device." command:command];
     goto ret;
+  }
+
+  // warn if already connected
+  if (self.deviceManager != nil && [self isConnected]) {
+    logDebug(@"CDVCast: connect called while already connected.");
   }
 
   // lookup the device
