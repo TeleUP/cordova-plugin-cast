@@ -4,8 +4,8 @@
  * using the provider method 'logLevel(level)'. Use the 'scan' and
  * 'connect' service methods to scan for and connect to a cast device.
  */
-angular.module('cast', [])
-    .provider('$cast', function CastProvider() {
+angular.module('ngCast', [])
+    .provider('$ngCast', function NgCastProvider() {
 
 	var LOG_LEVEL = 0;
 
@@ -18,7 +18,7 @@ angular.module('cast', [])
 	    LOG_LEVEL = parseInt(logLevel, 10);
 	};
 
-	this.$get = ['$q', '$timeout', function castFactory($q, $timeout) {
+	this.$get = ['$q', '$timeout', function ngCastFactory($q, $timeout) {
 
 	    var cast = null;
 	    var session = null;
