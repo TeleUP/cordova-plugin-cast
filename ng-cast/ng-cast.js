@@ -131,6 +131,13 @@ angular.module('cast', [])
 		    cast.sendMessage(message);
 		};
 
+		/**
+		 * Disconnects from the cast device.
+		 */
+		this.disconnect = function () {
+		    cast.disconnect();
+		}
+
 		var _connectionListener = {
 		    connected: function () {
 			cast.launchApplication(_appId, false, null, null);
