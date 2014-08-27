@@ -37,7 +37,7 @@ static id nullable(id arg) {
     @"applicationId"         : nullable(self.applicationID),
     @"applicationName"       : nullable(self.applicationName),
     @"images"                : images,
-    @"namespaces"            : self.namespaces
+    @"namespaces"            : nullable(self.namespaces)
   };
   return result;
 }
