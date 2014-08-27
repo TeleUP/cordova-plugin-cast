@@ -54,6 +54,8 @@ static void logTrace(NSString *format, ...) {
 @property(nonatomic) GCKDevice* device;
 @property(nonatomic) GCKDeviceManager *deviceManager;
 @property(nonatomic) CDVCastChannel *channel;
+@property(nonatomic) BOOL waitingForNamespace;
+@property(nonatomic) NSString* sessionID;
 
 @end
 
@@ -92,6 +94,7 @@ static void logTrace(NSString *format, ...) {
 
 - (void) connectToDevice {
   NSDictionary *info = [[NSBundle mainBundle] infoDictionary];
+  self.waitingForNamespace = NO;
   self.deviceManager = [[GCKDeviceManager alloc] initWithDevice:self.device
 					      clientPackageName:[info objectForKey:@"CFBundleIdentifier"]];
   self.deviceManager.delegate = self;
@@ -100,6 +103,7 @@ static void logTrace(NSString *format, ...) {
 
 - (void) disconnectFromDevice {
   if (self.deviceManager != nil) {
+    self.waitingForNamespace = NO;
     [self.deviceManager leaveApplication];
     [self.deviceManager disconnect];
     [self deviceDisconnected];
@@ -571,6 +575,15 @@ static void logTrace(NSString *format, ...) {
          launchedApplication:(BOOL)launchedApplication {
   logDebug(@"CDVCast: didConnectToCastApplication: %@ %@ %hhd", applicationMetadata, sessionID, launchedApplication);
 
+  /** The receiver app is not actually ready for input until the namespace is set.
+   * Delay the connected callback until an updated status with a namespace is received.
+   */
+  if (applicationMetadata.namespaces == nil || [applicationMetadata.namespaces count] == 0) {
+    self.waitingForNamespace = YES;
+    self.sessionID = sessionID;
+    return;
+  }
+
   if (self.connectionListenerCallbackId == nil) {
     logDebug(@"CDVCast: Dropping callback because no connection listener was set.");
     return;
@@ -648,6 +661,30 @@ static void logTrace(NSString *format, ...) {
          didReceiveStatusForApplication:(GCKApplicationMetadata*)applicationMetadata {
   logDebug(@"CDVCast: didReceiveStatusForApplication: %@", applicationMetadata);
 
+  /**
+   * If waiting for a namespace,
+   *  if we now have it, notify app that we are connected.
+   *  otherwise, keep waiting.
+   */
+  if (self.waitingForNamespace) {
+    if (applicationMetadata.namespaces == nil || [applicationMetadata.namespaces count] == 0) {
+      return;
+    }
+
+    NSDictionary *message = @{
+      @"type" : @"connectedToApplication",
+      @"args" : @[[applicationMetadata dictValue], self.sessionID]
+    };
+
+    CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
+    [result setKeepCallbackAsBool: YES];
+    [self.commandDelegate sendPluginResult:result callbackId:self.connectionListenerCallbackId];
+    return;
+  }
+  
+  /**
+   * We were not waiting for namespace, so treat updated status normally.
+   */
   if (self.connectionListenerCallbackId == nil) {
     logDebug(@"CDVCast: Dropping callback because no connection listener was set.");
     return;
