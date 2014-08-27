@@ -546,11 +546,15 @@ static void logTrace(NSString *format, ...) {
 - (void) deviceManager:(GCKDeviceManager*)deviceManager didDisconnectWithError:(NSError*)error {
   logDebug(@"CDVCast: didDisconnectWithError: %@", error);
 
+  if (error == nil) {
+    return;
+  }
+
   if (self.connectionListenerCallbackId == nil) {
     logDebug(@"CDVCast: Dropping callback because no connection listener was set.");
     return;
   }
-  
+    
   NSDictionary *message = @{
     @"type" : @"disconnected",
     @"args" : @[error ? error.description : @"null"]
@@ -602,6 +606,10 @@ static void logTrace(NSString *format, ...) {
 
 - (void) deviceManager:(GCKDeviceManager*)deviceManager didDisconnectFromApplicationWithError:(NSError*)error {
   logDebug(@"CDVCast: didDisconnectFromApplicationWithError: %@", error);
+
+  if (error == nil) {
+    return;
+  }
 
   if (self.connectionListenerCallbackId == nil) {
     logDebug(@"CDVCast: Dropping callback because no connection listener was set.");
