@@ -229,7 +229,7 @@ static void logTrace(NSString *format, ...) {
   logDebug(@"CDVCast: [->] sendTextMessage(%@)", message);
   
   if (!self.channel) {
-    [self sendIllegalAccessException:@"Must register received message listener first.." command:command];
+    [self sendIllegalAccessException:@"Must register received message listener first." command:command];
     goto ret;
   }
 
