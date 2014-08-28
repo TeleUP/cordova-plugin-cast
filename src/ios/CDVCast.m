@@ -580,6 +580,7 @@ static void logTrace(NSString *format, ...) {
    * Delay the connected callback until an updated status with a namespace is received.
    */
   if (applicationMetadata.namespaces == nil || [applicationMetadata.namespaces count] == 0) {
+    logDebug(@"CDVCast: waiting for receiver to set namespace...");
     self.waitingForNamespace = YES;
     self.sessionID = sessionID;
     return;
@@ -671,6 +672,8 @@ static void logTrace(NSString *format, ...) {
     if (applicationMetadata.namespaces == nil || [applicationMetadata.namespaces count] == 0) {
       return;
     }
+
+    logDebug(@"CDVCast: receiver namespace set.");
 
     NSDictionary *message = @{
       @"type" : @"connectedToApplication",
