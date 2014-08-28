@@ -111,6 +111,16 @@ static void logTrace(NSString *format, ...) {
   }
 }
 
+- (void) onAppTerminate {
+  logDebug(@"CDVCast: onAppTerminate() called");
+  [self disconnectFromDevice];
+}
+
+- (void) onReset {
+  logDebug(@"CDVCast: onReset() called");
+  [self disconnectFromDevice];
+}
+
 - (void) initialize:(CDVInvokedUrlCommand*)command {
   LOG_LEVEL = [[command.arguments objectAtIndex:0] integerValue];
   [GCKLogger sharedInstance].delegate = self;
