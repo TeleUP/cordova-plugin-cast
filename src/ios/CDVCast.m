@@ -90,6 +90,8 @@ static void logTrace(NSString *format, ...) {
   self.channel = nil;
   self.device = nil;
   self.deviceManager = nil;
+  self.sessionID = nil;
+  self.waitingForNamespace = NO;
 }
 
 - (void) connectToDevice {
@@ -103,7 +105,6 @@ static void logTrace(NSString *format, ...) {
 
 - (void) disconnectFromDevice {
   if (self.deviceManager != nil) {
-    self.waitingForNamespace = NO;
     [self.deviceManager leaveApplication];
     [self.deviceManager disconnect];
     [self deviceDisconnected];
