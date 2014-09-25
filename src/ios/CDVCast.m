@@ -45,7 +45,6 @@ static void logTrace(NSString *format, ...) {
 @interface CDVCast ()
 
 @property(nonatomic) GCKDeviceScanner* scanner;
-@property(nonatomic) GCKDeviceFilter* filter;
 
 @property(nonatomic) NSString* scanListenerCallbackId;
 @property(nonatomic) NSString* connectionListenerCallbackId;
@@ -114,6 +113,12 @@ static void logTrace(NSString *format, ...) {
 - (void) onAppTerminate {
   logDebug(@"CDVCast: onAppTerminate() called");
   [self disconnectFromDevice];
+
+  // Stop scanning
+  if (self.scanner.scanning) {
+    [self.scanner stopScan];
+  }
+  self.scanner = nil;
 }
 
 - (void) onReset {
@@ -127,6 +132,9 @@ static void logTrace(NSString *format, ...) {
 
   logDebug(@"CDVCast: [->] initialize()");
 
+  self.scanner = [[GCKDeviceScanner alloc] init];
+  [self.scanner addListener:self];
+
   [self sendSuccess:command];
 
   logDebug(@"CDVCast: [<-] initialize()");
@@ -138,17 +146,12 @@ static void logTrace(NSString *format, ...) {
   logDebug(@"CDVCast: [->] startScan(%@)", appId);
 
   // Stop previous scan, if any.
-  if (self.scanner != nil && self.scanner.scanning) {
+  if (self.scanner.scanning) {
     [self.scanner stopScan];
-    self.filter = nil;
-    self.scanner = nil;
   }
 
-  // Create scanner and filter
-  self.scanner = [[GCKDeviceScanner alloc] init];
-  GCKFilterCriteria *criteria = [GCKFilterCriteria criteriaForAvailableApplicationWithID:appId];
-  self.filter = [[GCKDeviceFilter alloc] initWithDeviceScanner:self.scanner criteria:criteria];
-  [self.filter addDeviceFilterListener:self];
+  // Update the scanner filter criteria
+  self.scanner.filterCriteria = [GCKFilterCriteria criteriaForAvailableApplicationWithID:appId];
 
   self.scanListenerCallbackId = command.callbackId;
   [self.scanner startScan];
@@ -159,8 +162,10 @@ static void logTrace(NSString *format, ...) {
 - (void) stopScan:(CDVInvokedUrlCommand*)command {
   logDebug(@"CDVCast: [->] stopScan()");
 
-  [self.scanner stopScan];
-  self.scanListenerCallbackId = nil;
+  if (self.scanner.scanning) {
+    [self.scanner stopScan];
+    self.scanListenerCallbackId = nil;
+  }
 
   [self sendSuccess:command];
   logDebug(@"CDVCast: [<-] stopScan()");
@@ -486,8 +491,8 @@ static void logTrace(NSString *format, ...) {
   logDebug(@"CDVCast: [<-] setReconnectTimeout");
 }
 
-#pragma mark - GCKDeviceFilterListener
-- (void)deviceDidComeOnline:(GCKDevice *)device forDeviceFilter:(GCKDeviceFilter *)deviceFilter {
+#pragma mark - GCKDeviceScannerListener
+- (void)deviceDidComeOnline:(GCKDevice *)device {
   logDebug(@"CDVCast: [->] deviceDidComeOnline()");
 
   if (self.scanListenerCallbackId != nil) {
@@ -504,7 +509,7 @@ static void logTrace(NSString *format, ...) {
   logDebug(@"CDVCast: [<-] deviceDidComeOnline()");
 }
 
-- (void)deviceDidGoOffline:(GCKDevice *)device forDeviceFilter:(GCKDeviceFilter *)deviceFilter {
+- (void)deviceDidGoOffline:(GCKDevice *)device {
   logDebug(@"CDVCast: [->] deviceDidGoOffline()");
 
   if (self.scanListenerCallbackId != nil) {
@@ -521,7 +526,17 @@ static void logTrace(NSString *format, ...) {
   logDebug(@"CDVCast: [<-] deviceDidGoOffline()");
 }
 
+- (void)deviceDidChange:(GCKDevice *)device {
+  logDebug(@"CDVCast: [->] deviceDidChange()");
+  logDebug(@"CDVCast: [<-] deviceDidChange()");
+}
+
 #pragma mark - GCKDeviceManagerDelegate
+- (void) deviceManager:(GCKDeviceManager*)deviceManager request:(NSInteger)requestID didFailWithError:(NSError*)error {
+  logDebug(@"CDVCast: didFailWithError: %zd %@", requestID, error);
+  logDebug(@"CDVCast:  ignoring failed request.");
+}
+
 - (void) deviceManagerDidConnect:(GCKDeviceManager*)deviceManager {
   logDebug(@"CDVCast: deviceManagerDidConnect()");
   
@@ -573,6 +588,37 @@ static void logTrace(NSString *format, ...) {
   NSDictionary *message = @{
     @"type" : @"disconnected",
     @"args" : @[error ? error.description : @"null"]
+  };
+
+  CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
+  [result setKeepCallbackAsBool: YES];
+  [self.commandDelegate sendPluginResult:result callbackId:self.connectionListenerCallbackId];
+}
+
+- (void) deviceManager:(GCKDeviceManager*)deviceManager didSuspendConnectionWithReason:(GCKConnectionSuspendReason)reason {
+  logDebug(@"CDVCast: didSuspendConnectionWithReason: %zd", reason);
+
+  if (self.connectionListenerCallbackId == nil) {
+    logDebug(@"CDVCast: Dropping callback because no connection listener was set.");
+    return;
+  }
+
+  NSDictionary *message = @{
+    @"type" : @"suspendedConnection",
+    @"args" : @[]
+  };
+
+  CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
+  [result setKeepCallbackAsBool: YES];
+  [self.commandDelegate sendPluginResult:result callbackId:self.connectionListenerCallbackId];
+}
+
+- (void) deviceManagerDidResumeConnection:(GCKDeviceManager*)deviceManager rejoinedApplication:(BOOL)rejoinedApplication {
+  logDebug(@"CDVCast: deviceManagerDidResumeConnection: %hhd", rejoinedApplication);
+
+  NSDictionary *message = @{
+    @"type" : @"resumedConnection",
+    @"args" : @[[NSNumber numberWithBool:rejoinedApplication]]
   };
 
   CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
@@ -670,8 +716,8 @@ static void logTrace(NSString *format, ...) {
 }
 
 - (void) deviceManager:(GCKDeviceManager*)deviceManager
-         didReceiveStatusForApplication:(GCKApplicationMetadata*)applicationMetadata {
-  logDebug(@"CDVCast: didReceiveStatusForApplication: %@", applicationMetadata);
+         didReceiveApplicationMetadata:(GCKApplicationMetadata*)applicationMetadata {
+  logDebug(@"CDVCast: didReceiveApplicationMetadata: %@", applicationMetadata);
 
   /**
    * If waiting for a namespace,
@@ -707,6 +753,25 @@ static void logTrace(NSString *format, ...) {
   NSDictionary *message = @{
     @"type" : @"applicationStatusReceived",
     @"args" : @[[applicationMetadata dictValue]]
+  };
+
+  CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
+  [result setKeepCallbackAsBool: YES];
+  [self.commandDelegate sendPluginResult:result callbackId:self.connectionListenerCallbackId];
+}
+
+- (void) deviceManager:(GCKDeviceManager*)deviceManager
+         didReceiveApplicationStatusText:(NSString*)applicationStatusText {
+  logDebug(@"CDVCast: didReceiveApplicationStatusText: %@", applicationStatusText);
+
+  if (self.connectionListenerCallbackId == nil) {
+    logDebug(@"CDVCast: Dropping callback because no connection listener was set.");
+    return;
+  }
+
+  NSDictionary *message = @{
+    @"type" : @"applicationStatusTextReceived",
+    @"args" : @[applicationStatusText]
   };
 
   CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
