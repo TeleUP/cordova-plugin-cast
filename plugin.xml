@@ -71,6 +71,7 @@
     <header-file src="src/ios/GCKApplicationMetadata+Dict.h" />
     <source-file src="src/ios/GCKApplicationMetadata+Dict.m" />
 
+    <framework src="SystemConfiguration.framework" />
     <framework src="CoreText.framework" />
     <framework src="MediaAccessibility.framework" />
     <framework src="Security.framework" />
