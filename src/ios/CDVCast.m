@@ -670,8 +670,8 @@ static void logTrace(NSString *format, ...) {
 }
 
 - (void) deviceManager:(GCKDeviceManager*)deviceManager
-         didReceiveStatusForApplication:(GCKApplicationMetadata*)applicationMetadata {
-  logDebug(@"CDVCast: didReceiveStatusForApplication: %@", applicationMetadata);
+         didReceiveApplicationMetadata:(GCKApplicationMetadata*)applicationMetadata {
+  logDebug(@"CDVCast: didReceiveApplicationMetadata: %@", applicationMetadata);
 
   /**
    * If waiting for a namespace,
