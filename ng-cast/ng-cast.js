@@ -74,6 +74,8 @@ angular.module('ngCast', [])
 
 		var _onReceivedMessage = angular.noop;
 		var _onDisconnected = angular.noop;
+		var _onSuspended = angular.noop;
+		var _onResumed = angular.noop;
 
 		/**
 		 * Gets the id of the receiver application for this session.
@@ -112,12 +114,18 @@ angular.module('ngCast', [])
 		 * @param {Function} onDisconnected callback when the
 		 *                                  session has ended
 		 *                                  due to an
-		 *                                  error. Pass as a
+		 *                                  error. Passed as a
 		 *                                  string.
+		 * @param {Function} onSuspended callback when the connection has
+		 *                               been temporarily suspend.
+		 * @param {Function} onResumed callback when the connection has
+		 *                             been resumed.
 		 */
-		this.setListeners = function (onReceivedMessage, onDisconnected) {
+		this.setListeners = function (onReceivedMessage, onDisconnected, onSuspended, onResumed) {
 		    _onReceivedMessage = apply(onReceivedMessage || angular.noop);
 		    _onDisconnected = apply(onDisconnected || angular.noop);
+		    _onSuspended = apply(onSuspended || angular.noop);
+		    _onResumed = apply(onResumed || angular.noop);
 		    cast.setReceivedMessageListener(_namespace, _onReceivedMessage);
 		};
 
@@ -169,6 +177,18 @@ angular.module('ngCast', [])
 
 		    failedToStopApplication : function (error) {
 			// ignore, because never stop the application
+		    },
+
+		    suspendedConnection : function () {
+			_onSuspended();
+		    },
+
+		    resumedConnection : function (rejoined) {
+			_onResumed();
+			if (!rejoined) {
+			    cast.disconnect();
+			    _onDisconnected("failed to rejoin application after resuming connection");
+			}
 		    },
 
 		    volumeChanged : function (volumeLevel, isMuted) {
