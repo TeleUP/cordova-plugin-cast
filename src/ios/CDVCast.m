@@ -755,6 +755,25 @@ static void logTrace(NSString *format, ...) {
   [self.commandDelegate sendPluginResult:result callbackId:self.connectionListenerCallbackId];
 }
 
+- (void) deviceManager:(GCKDeviceManager*)deviceManager
+         didReceiveApplicationStatusText:(NSString*)applicationStatusText {
+  logDebug(@"CDVCast: didReceiveApplicationStatusText: %@", applicationStatusText);
+
+  if (self.connectionListenerCallbackId == nil) {
+    logDebug(@"CDVCast: Dropping callback because no connection listener was set.");
+    return;
+  }
+
+  NSDictionary *message = @{
+    @"type" : @"applicationStatusTextReceived",
+    @"args" : @[applicationStatusText]
+  };
+
+  CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
+  [result setKeepCallbackAsBool: YES];
+  [self.commandDelegate sendPluginResult:result callbackId:self.connectionListenerCallbackId];
+}
+
 - (void) deviceManager:(GCKDeviceManager*)deviceManager 
          volumeDidChangeToLevel:(float)volumeLevel 
 	 isMuted:(BOOL)isMuted {
