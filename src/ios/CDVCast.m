@@ -113,6 +113,12 @@ static void logTrace(NSString *format, ...) {
 - (void) onAppTerminate {
   logDebug(@"CDVCast: onAppTerminate() called");
   [self disconnectFromDevice];
+
+  // Stop scanning
+  if (self.scanner.scanning) {
+    [self.scanner stopScan];
+  }
+  self.scanner = nil;
 }
 
 - (void) onReset {
@@ -126,6 +132,9 @@ static void logTrace(NSString *format, ...) {
 
   logDebug(@"CDVCast: [->] initialize()");
 
+  self.scanner = [[GCKDeviceScanner alloc] init];
+  [self.scanner addListener:self];
+
   [self sendSuccess:command];
 
   logDebug(@"CDVCast: [<-] initialize()");
@@ -137,16 +146,12 @@ static void logTrace(NSString *format, ...) {
   logDebug(@"CDVCast: [->] startScan(%@)", appId);
 
   // Stop previous scan, if any.
-  if (self.scanner != nil && self.scanner.scanning) {
+  if (self.scanner.scanning) {
     [self.scanner stopScan];
-    [self.scanner removeListener:self];
-    self.scanner = nil;
   }
 
-  // Create scanner
-  self.scanner = [[GCKDeviceScanner alloc] init];
+  // Update the scanner filter criteria
   self.scanner.filterCriteria = [GCKFilterCriteria criteriaForAvailableApplicationWithID:appId];
-  [self.scanner addListener:self];
 
   self.scanListenerCallbackId = command.callbackId;
   [self.scanner startScan];
@@ -157,8 +162,10 @@ static void logTrace(NSString *format, ...) {
 - (void) stopScan:(CDVInvokedUrlCommand*)command {
   logDebug(@"CDVCast: [->] stopScan()");
 
-  [self.scanner stopScan];
-  self.scanListenerCallbackId = nil;
+  if (self.scanner.scanning) {
+    [self.scanner stopScan];
+    self.scanListenerCallbackId = nil;
+  }
 
   [self sendSuccess:command];
   logDebug(@"CDVCast: [<-] stopScan()");
