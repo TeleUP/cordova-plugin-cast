@@ -18,7 +18,7 @@
 #import <Cordova/CDVPlugin.h>
 #import <GoogleCast/GoogleCast.h>
 
-@interface CDVCast : CDVPlugin<GCKDeviceFilterListener,
+@interface CDVCast : CDVPlugin<GCKDeviceScannerListener,
                                GCKLoggerDelegate,
                                GCKDeviceManagerDelegate>
 

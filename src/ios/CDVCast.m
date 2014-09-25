@@ -45,7 +45,6 @@ static void logTrace(NSString *format, ...) {
 @interface CDVCast ()
 
 @property(nonatomic) GCKDeviceScanner* scanner;
-@property(nonatomic) GCKDeviceFilter* filter;
 
 @property(nonatomic) NSString* scanListenerCallbackId;
 @property(nonatomic) NSString* connectionListenerCallbackId;
@@ -140,15 +139,14 @@ static void logTrace(NSString *format, ...) {
   // Stop previous scan, if any.
   if (self.scanner != nil && self.scanner.scanning) {
     [self.scanner stopScan];
-    self.filter = nil;
+    [self.scanner removeListener:self];
     self.scanner = nil;
   }
 
-  // Create scanner and filter
+  // Create scanner
   self.scanner = [[GCKDeviceScanner alloc] init];
-  GCKFilterCriteria *criteria = [GCKFilterCriteria criteriaForAvailableApplicationWithID:appId];
-  self.filter = [[GCKDeviceFilter alloc] initWithDeviceScanner:self.scanner criteria:criteria];
-  [self.filter addDeviceFilterListener:self];
+  self.scanner.filterCriteria = [GCKFilterCriteria criteriaForAvailableApplicationWithID:appId];
+  [self.scanner addListener:self];
 
   self.scanListenerCallbackId = command.callbackId;
   [self.scanner startScan];
@@ -486,8 +484,8 @@ static void logTrace(NSString *format, ...) {
   logDebug(@"CDVCast: [<-] setReconnectTimeout");
 }
 
-#pragma mark - GCKDeviceFilterListener
-- (void)deviceDidComeOnline:(GCKDevice *)device forDeviceFilter:(GCKDeviceFilter *)deviceFilter {
+#pragma mark - GCKDeviceScannerListener
+- (void)deviceDidComeOnline:(GCKDevice *)device {
   logDebug(@"CDVCast: [->] deviceDidComeOnline()");
 
   if (self.scanListenerCallbackId != nil) {
@@ -504,7 +502,7 @@ static void logTrace(NSString *format, ...) {
   logDebug(@"CDVCast: [<-] deviceDidComeOnline()");
 }
 
-- (void)deviceDidGoOffline:(GCKDevice *)device forDeviceFilter:(GCKDeviceFilter *)deviceFilter {
+- (void)deviceDidGoOffline:(GCKDevice *)device {
   logDebug(@"CDVCast: [->] deviceDidGoOffline()");
 
   if (self.scanListenerCallbackId != nil) {
@@ -519,6 +517,11 @@ static void logTrace(NSString *format, ...) {
   }
 
   logDebug(@"CDVCast: [<-] deviceDidGoOffline()");
+}
+
+- (void)deviceDidChange:(GCKDevice *)device {
+  logDebug(@"CDVCast: [->] deviceDidChange()");
+  logDebug(@"CDVCast: [<-] deviceDidChange()");
 }
 
 #pragma mark - GCKDeviceManagerDelegate
