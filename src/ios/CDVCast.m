@@ -532,6 +532,11 @@ static void logTrace(NSString *format, ...) {
 }
 
 #pragma mark - GCKDeviceManagerDelegate
+- (void) deviceManager:(GCKDeviceManager*)deviceManager request:(NSInteger)requestID didFailWithError:(NSError*)error {
+  logDebug(@"CDVCast: didFailWithError: %zd %@", requestID, error);
+  logDebug(@"CDVCast:  ignoring failed request.");
+}
+
 - (void) deviceManagerDidConnect:(GCKDeviceManager*)deviceManager {
   logDebug(@"CDVCast: deviceManagerDidConnect()");
   
