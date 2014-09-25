@@ -590,6 +590,37 @@ static void logTrace(NSString *format, ...) {
   [self.commandDelegate sendPluginResult:result callbackId:self.connectionListenerCallbackId];
 }
 
+- (void) deviceManager:(GCKDeviceManager*)deviceManager didSuspendConnectionWithReason:(GCKConnectionSuspendReason)reason {
+  logDebug(@"CDVCast: didSuspendConnectionWithReason: %zd", reason);
+
+  if (self.connectionListenerCallbackId == nil) {
+    logDebug(@"CDVCast: Dropping callback because no connection listener was set.");
+    return;
+  }
+
+  NSDictionary *message = @{
+    @"type" : @"suspendedConnection",
+    @"args" : @[]
+  };
+
+  CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
+  [result setKeepCallbackAsBool: YES];
+  [self.commandDelegate sendPluginResult:result callbackId:self.connectionListenerCallbackId];
+}
+
+- (void) deviceManagerDidResumeConnection:(GCKDeviceManager*)deviceManager rejoinedApplication:(BOOL)rejoinedApplication {
+  logDebug(@"CDVCast: deviceManagerDidResumeConnection: %hhd", rejoinedApplication);
+
+  NSDictionary *message = @{
+    @"type" : @"resumedConnection",
+    @"args" : @[[NSNumber numberWithBool:rejoinedApplication]]
+  };
+
+  CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
+  [result setKeepCallbackAsBool: YES];
+  [self.commandDelegate sendPluginResult:result callbackId:self.connectionListenerCallbackId];
+}
+
 - (void) deviceManager:(GCKDeviceManager*)deviceManager
          didConnectToCastApplication:(GCKApplicationMetadata*)applicationMetadata
          sessionID:(NSString*)sessionID
