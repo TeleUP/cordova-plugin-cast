@@ -1,0 +1,34 @@
+{
+  "name": "cordova-plugin-cast",
+  "version": "0.1.0-dev",
+  "description": "Cordova Chromecast Plugin",
+  "cordova": {
+    "id": "com.willbild.cordova.cast",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TeleUP/cordova-plugin-cast.git"
+  },
+  "keywords": [
+    "cordova",
+    "chromecast",
+    "cast",
+    "ecosystem:cordova",
+    "cordova-ios"
+  ],
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=3.4.0"
+    }
+  ],
+  "author": "",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/TeleUP/cordova-plugin-cast/issues"
+  },
+  "homepage": "https://github.com/TeleUP/cordova-plugin-cast#readme"
+}
